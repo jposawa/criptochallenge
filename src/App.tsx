@@ -31,23 +31,16 @@ export default function App() {
     const _depthWS = new WebSocket(
       `wss://stream.binance.com:9443/ws/${currentSymbol.code}@depth20@100ms`
     );
-    if (depthWS) {
-      depthWS.close();
-    }
 
-    setDepthWS((currentWS) => {
-      console.table({
-        currentWS,
-        _depthWS,
-      });
-
-      if (currentWS?.url === _depthWS.url) {
-        return currentWS;
+    if (depthWS?.url !== _depthWS.url) {
+      if (depthWS) {
+        toast.success(
+          `Getting data for ${currentSymbol.base}/${currentSymbol.quote}`
+        );
       }
-
-      toast.info(`Getting data for ${currentSymbol.code.toUpperCase()}`);
-      return _depthWS;
-    });
+      depthWS?.close();
+      setDepthWS(_depthWS);
+    }
   }, [currentSymbol]);
 
   React.useEffect(() => {
