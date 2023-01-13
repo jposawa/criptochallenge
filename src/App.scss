@@ -4,16 +4,23 @@
   box-sizing: border-box;
   text-decoration: none;
   list-style: none;
+  font-family: Tahoma, "Segoe UI", Geneva, Verdana, sans-serif;
+}
+
+input,
+button {
+  border: 1px solid;
 }
 
 main {
   --buyColor: rgba(13, 203, 129, 1);
-  --sellColor: rgba(246, 71, 93,1);
+  --sellColor: rgba(246, 71, 93, 1);
   --whiteColor: #eee;
-  --darkColor: rgba(22, 26, 30, 1);
+  --darkColor: rgb(5, 9, 14);
   --textColor: var(--darkColor);
   --bgColor: var(--whiteColor);
-  
+  --mainColor: var(--color1, var(--textColor));
+
   position: absolute;
   width: 100%;
   height: 100%;
@@ -35,21 +42,72 @@ main {
   align-items: center;
   justify-content: space-between;
   overflow: hidden;
-}
 
-.bookData {
-  width: 100%;
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: space-between;
-  overflow: hidden;
+  .bookData {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    overflow: hidden;
+
+    & > * {
+      width: 100%;
+      display: flex;
+      padding: 0 0.5rem;
+    }
+
+    header {
+      justify-content: space-between;
+      opacity: 0.85;
+
+      &>span:nth-child(2) {
+        width: 35%;
+      }
+    }
+
+    .dataRow {
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+
+      &>span {
+        width: 35%;
+        
+
+        &:first-child {
+          width: 50%;
+        }
+
+        &:last-child {
+          width: 35%;
+          text-align: right;
+        }
+      }
+    }
+
+    section {
+      height: 100%;
+      align-items: flex-end;
+
+      &:last-child {
+        align-items: flex-start;
+      }
+    }
+
+    div {
+      height: 15%;
+      align-items: center;
+      font-size: 1.5em;
+    }
+  }
 }
 
 .darkTheme {
   --bgColor: var(--darkColor);
   --textColor: var(--whiteColor);
+  --color1: rgb(228, 194, 6);
 }
 
 .txtSeller {

@@ -1,0 +1,40 @@
+.bookSettings {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  form {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    input,
+    button {
+      --size: 2rem;
+
+      padding: 0.2rem;
+      background: var(--bgColor);
+      color: var(--mainColor);
+    }
+
+    button {
+      background: var(--mainColor);
+      color: var(--bgColor);
+      font-size: 1rem;
+      border-color: var(--mainColor);
+    }
+
+    input {
+      width: 70%;
+      height: var(--size);
+    }
+
+    .quadButton {
+      width: var(--size);
+      height: var(--size);
+      font-weight: bold;
+    }
+  }
+}
