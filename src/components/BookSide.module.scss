@@ -1,4 +1,7 @@
 .bookSide {
+  &>ul {
+    width: 100%;
+  }
   .price {
     color: var(--priceColor, var(--textColor));
   }

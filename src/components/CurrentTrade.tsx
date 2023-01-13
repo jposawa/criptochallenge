@@ -41,10 +41,10 @@ export const CurrentTrade = () => {
   return (
     <>
       {currentTrade && (
-        <section className={currentTrade.isSeller ? "txtSeller" : "txtBuyer"}>
+        <div className={currentTrade.isSeller ? "txtSeller" : "txtBuyer"}>
           <span>{currentTrade?.price.toFixed(2)}</span>
           <span>{currentTrade.isSeller ? <>&#8595;</> : <>&#8593;</>}</span>
-        </section>
+        </div>
       )}
     </>
   );

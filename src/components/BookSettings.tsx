@@ -5,6 +5,8 @@ import { TradeSymbol } from "../models";
 import { currentSymbolState } from "../state";
 import { toast } from "react-toastify";
 
+import styles from "./BookSettings.module.scss";
+
 export const BookSettings = () => {
   const [currentSymbol, setCurrentSymbol] = useRecoilState(currentSymbolState);
   const [symbolsList, setSymbolsList] = React.useState<TradeSymbol[]>([]);
@@ -54,7 +56,7 @@ export const BookSettings = () => {
   }, []);
 
   return (
-    <div className="settings">
+    <div className={styles.bookSettings}>
       <form onSubmit={updateCurrentSymbol}>
         <datalist id="symbolsList">
           {symbolsList.map((symbol, index) => (
@@ -75,7 +77,7 @@ export const BookSettings = () => {
           ref={symbolCodeRef}
         />
 
-        <button type="submit">&#8635;</button>
+        <button type="submit" className={styles.quadButton}>&#8635;</button>
       </form>
     </div>
   );

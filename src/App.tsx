@@ -57,6 +57,11 @@ export default function App() {
 
       <section className="bookContainer">
         <div className="bookData">
+          <header>
+            <span>Price ({currentSymbol.quote})</span>
+            <span>Amount ({currentSymbol.base})</span>
+            <span>Total</span>
+          </header>
           <BookSide sideType="sell" data={operationsData?.asks || []} />
 
           <CurrentTrade />
