@@ -1,17 +1,18 @@
 import React from "react";
-import { useRecoilValue } from 'recoil'
-import './App.scss'
-import { BookSettings, BookSide, CurrentTrade } from './components';
-import { currentSymbolState, themeState } from './state'
+import { useRecoilValue } from "recoil";
+import "react-toastify/dist/ReactToastify.css";
+import "./App.scss";
+import { BookSettings, BookSide, CurrentTrade } from "./components";
+import { currentSymbolState, themeState } from "./state";
 import { OperationsDataProps } from "./models";
-
-// GET pairs https://data.binance.com/api/v3/exchangeInfo
+import { ToastContainer, toast } from "react-toastify";
 
 export default function App() {
   const currentSymbol = useRecoilValue(currentSymbolState);
   const [depthWS, setDepthWS] = React.useState<WebSocket>();
-  const [operationsData, setOperationsData] = React.useState<OperationsDataProps>();
-  
+  const [operationsData, setOperationsData] =
+    React.useState<OperationsDataProps>();
+
   const theme = useRecoilValue(themeState);
 
   const updateOperations = () => {
@@ -22,22 +23,31 @@ export default function App() {
 
           setOperationsData(parsedData);
         }
-      }
+      };
     }
-  }
-
-  
-
-  
+  };
 
   React.useEffect(() => {
-    // const _webSocket = new WebSocket(`wss://fstream.binance.com/ws/${currentSymbol}@bookTicker`);
-    const _depthWS = new WebSocket(`wss://stream.binance.com:9443/ws/${currentSymbol.code}@depth20@100ms`);
+    const _depthWS = new WebSocket(
+      `wss://stream.binance.com:9443/ws/${currentSymbol.code}@depth20@100ms`
+    );
     if (depthWS) {
       depthWS.close();
     }
 
-    setDepthWS(_depthWS);
+    setDepthWS((currentWS) => {
+      console.table({
+        currentWS,
+        _depthWS,
+      });
+
+      if (currentWS?.url === _depthWS.url) {
+        return currentWS;
+      }
+
+      toast.info(`Getting data for ${currentSymbol.code.toUpperCase()}`);
+      return _depthWS;
+    });
   }, [currentSymbol]);
 
   React.useEffect(() => {
@@ -46,10 +56,16 @@ export default function App() {
 
   return (
     <main className={theme}>
+      <ToastContainer
+        theme={theme === "darkTheme" ? "dark" : "light"}
+        closeOnClick
+        position="top-right"
+      />
+
       <section className="bookContainer">
         <div className="bookData">
           <BookSide sideType="sell" data={operationsData?.asks || []} />
-          
+
           <CurrentTrade />
 
           <BookSide sideType="buy" data={operationsData?.bids || []} />
@@ -58,5 +74,5 @@ export default function App() {
         <BookSettings />
       </section>
     </main>
-  )
+  );
 }
