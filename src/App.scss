@@ -1,0 +1,61 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  text-decoration: none;
+  list-style: none;
+}
+
+main {
+  --buyColor: rgba(13, 203, 129, 1);
+  --sellColor: rgba(246, 71, 93,1);
+  --whiteColor: #eee;
+  --darkColor: rgba(22, 26, 30, 1);
+  --textColor: var(--darkColor);
+  --bgColor: var(--whiteColor);
+  
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  color: var(--textColor, initial);
+  background: var(--bgColor, initial);
+}
+
+.bookContainer {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  overflow: hidden;
+}
+
+.bookData {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  overflow: hidden;
+}
+
+.darkTheme {
+  --bgColor: var(--darkColor);
+  --textColor: var(--whiteColor);
+}
+
+.txtSeller {
+  color: var(--sellColor);
+}
+
+.txtBuyer {
+  color: var(--buyColor);
+}
