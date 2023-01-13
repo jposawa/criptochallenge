@@ -1,6 +1,6 @@
 import React from "react";
 
-import styles from "./BookSide.module.scss";
+import "./BookSide.scss";
 
 type BookSideProps = {
   data: string[];
@@ -28,8 +28,8 @@ export const BookSide: React.FC<BookSideProps> = ({ sideType, data }) => {
 
   return (
     <section
-      className={styles.bookSide}
-      style={{ "--priceColor": `var(${priceColor})` }}
+      className="bookSide"
+      style={{ "--priceColor": `var(${priceColor})` } as React.CSSProperties}
     >
       <ul>
         {filterredData &&
@@ -42,7 +42,7 @@ export const BookSide: React.FC<BookSideProps> = ({ sideType, data }) => {
 
             return (
               <li key={index} className="dataRow">
-                <span className={styles.price}>{opPrice}</span>
+                <span className="price">{opPrice}</span>
                 <span>{opAmount}</span>
                 <span>{opTotal}</span>
               </li>
