@@ -19,18 +19,24 @@ type CurrentTradeProps = {
   usdPrice?: number,
 };
 
+export type TradeSymbol = {
+  code: string;
+  base: string;
+  quote: string;
+}
+
 export default function App() {
-  const [currentSymbol, setCurrentSymbol] = React.useState({
+  const [currentSymbol, setCurrentSymbol] = React.useState<TradeSymbol>({
     code: "btcusdt",
     base: "BTC",
     quote: "USDT",
   });
-  const [depthWS, setDepthWS] = React.useState();
+  const [depthWS, setDepthWS] = React.useState<WebSocket>();
   const [operationsData, setOperationsData] = React.useState<OperationsDataProps>();
   const [currentTrade, setCurrentTrade] = React.useState<CurrentTradeProps>();
   const [totalQueries, setTotalQueries] = React.useState(0);
-  const [symbolsList, setSymbolsList] = React.useState([]);
-  const symbolCodeRef = React.useRef();
+  const [symbolsList, setSymbolsList] = React.useState<TradeSymbol[]>([]);
+  const symbolCodeRef = React.useRef<HTMLInputElement>(null);
   const theme = useRecoilValue(themeState);
 
   const updateOperations = () => {
@@ -52,7 +58,7 @@ export default function App() {
   }
 
   const updatePrice = () => {
-    const teste: CurrentTradeProps = { price: 0, isSeller: false };
+    const trade: CurrentTradeProps = { price: 0, isSeller: false };
 
     axios.get("https://data.binance.com/api/v3/trades", {
       params: {
@@ -60,10 +66,10 @@ export default function App() {
         limit: 1,
       }
     }).then((response) => {
-      teste.price = parseFloat(response.data[0].price);
-      teste.isSeller = response.data[0].isBuyerMaker;
+      trade.price = parseFloat(response.data[0].price);
+      trade.isSeller = response.data[0].isBuyerMaker;
 
-      setCurrentTrade(teste);
+      setCurrentTrade(trade);
     }).catch((error) => {
       console.warn("REST Error", error);
     }).finally(() => {
@@ -113,7 +119,7 @@ export default function App() {
           <BookSide sideType="sell" data={operationsData?.asks || []} />
           {currentTrade && (
             <section className={currentTrade.isSeller ? "txtSeller" : "txtBuyer"}>
-              <span>{parseFloat(currentTrade?.price).toFixed(2)}</span>
+              <span>{currentTrade?.price.toFixed(2)}</span>
               <span>{currentTrade.isSeller ? (<>&#8595;</>) : (<>&#8593;</>)}</span>
             </section>
           )}
