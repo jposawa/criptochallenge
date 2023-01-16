@@ -90,7 +90,7 @@ export default function App() {
       `wss://stream.binance.com:9443/ws/${currentSymbol.code}@depth`
     );
 
-    if (depthWS?.url !== _depthWS.url) {
+    if (depthWS?.url !== _depthWS.url || depthWS.readyState === depthWS.CLOSED) {
       if (depthWS) {
         toast.success(
           `Getting data for ${currentSymbol.base}/${currentSymbol.quote}`

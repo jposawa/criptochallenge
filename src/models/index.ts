@@ -8,7 +8,6 @@ export type TradeSymbol = {
   code: string;
   base: string;
   quote: string;
-  usdPrice?: number;
 }
 
 export type OperationsDataType = {

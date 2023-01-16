@@ -6,8 +6,9 @@ import { currentSymbolState } from "../state";
 
 export const CurrentTrade = () => {
   const [tradeWS, setTradeWS] = React.useState<WebSocket>();
-  const [totalQueries, setTotalQueries] = React.useState(0);
+  const [priceWS, setPriceWS] = React.useState<WebSocket>();
   const [currentTrade, setCurrentTrade] = React.useState<CurrentTradeType>();
+  const [usdPrice, setUsdPrice] = React.useState<string>();
   const currentSymbol = useRecoilValue(currentSymbolState);
 
   const updateTrade = () => {
@@ -26,6 +27,19 @@ export const CurrentTrade = () => {
               isSeller: parsedData.m,
             }
           })
+        }
+      };
+    }
+  };
+
+  const updatePrice = () => {
+    if (priceWS) {
+      priceWS.onmessage = ({ data }: { data: string }) => {
+        if (data) {
+          const parsedData = JSON.parse(data);
+          const openPrice = parseFloat(parsedData.o).toFixed(2);
+
+          setUsdPrice(openPrice);
         }
       };
     }
@@ -55,15 +69,46 @@ export const CurrentTrade = () => {
       });
   };
 
+  const getPriceSnapshot = () => {
+    const trade: CurrentTradeType = { price: 0, isSeller: false };
+
+    axios
+      .get("https://data.binance.com/api/v3/ticker/price", {
+        params: {
+          symbol: currentSymbol.code.toUpperCase(),
+        },
+      })
+      .then((response) => {
+        const { data } = response;
+
+        if (data) {
+          setUsdPrice(parseFloat(data.price).toFixed(2));
+        }
+      })
+      .catch((error) => {
+        console.warn("Error fetch price", error);
+      })
+      .finally(() => {
+        updatePrice();
+      });
+  };
+
   React.useEffect(() => {
     const _tradeWS = new WebSocket(
       `wss://stream.binance.com:9443/ws/${currentSymbol.code}@trade`
     );
+    const _priceWS = new WebSocket(`wss://stream.binance.com:9443/ws/${currentSymbol.code}@miniTicker`)
 
-    if (tradeWS?.url !== _tradeWS.url) {
+    if (tradeWS?.url !== _tradeWS.url || tradeWS.readyState === tradeWS.CLOSED) {
       tradeWS?.close();
 
       setTradeWS(_tradeWS);
+    }
+
+    if (priceWS?.url !== _priceWS.url || priceWS.readyState === priceWS.CLOSED) {
+      priceWS?.close();
+
+      setPriceWS(_priceWS);
     }
   }, [currentSymbol.code]);
 
@@ -71,14 +116,22 @@ export const CurrentTrade = () => {
     getTradeSnapshot();
   }, [tradeWS?.url]);
 
+  React.useEffect(() => {
+    getPriceSnapshot();
+  }, [priceWS?.url]);
+
   return (
-    <>
+    <section className="currentData">
       {currentTrade && (
         <div className={currentTrade.isSeller ? "txtSeller" : "txtBuyer"}>
           <span>{currentTrade?.price.toFixed(2)}</span>
           <span>{currentTrade.isSeller ? <>&#8595;</> : <>&#8593;</>}</span>
         </div>
       )}
-    </>
+
+      {usdPrice && (
+        <span>${usdPrice}</span>
+      )}
+    </section>
   );
 };
