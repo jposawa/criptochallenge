@@ -19,6 +19,7 @@ export const BookSettings = () => {
   const [decimalPlaces, setDecimalPlaces] = useRecoilState(decimalPlacesState);
   const [typeColumnShow, setTypeColumnShow] =
     useRecoilState(typeColumnShowState);
+  const columnIconSize = window.innerWidth >= 1200 ? "2rem" : "1.5rem";
 
   const handleDecimalPlaces = (event: React.ChangeEvent<HTMLSelectElement>) => {
     const select = event.target;
@@ -79,6 +80,7 @@ export const BookSettings = () => {
         >
           <SideIcon
             active={typeColumnShow !== "buy" && typeColumnShow !== "sell"}
+            size={columnIconSize}
           />
         </span>
 
@@ -87,7 +89,11 @@ export const BookSettings = () => {
             setTypeColumnShow("buy");
           }}
         >
-          <SideIcon typeIcon="buy" active={typeColumnShow === "buy"} />
+          <SideIcon
+            typeIcon="buy"
+            active={typeColumnShow === "buy"}
+            size={columnIconSize}
+          />
         </span>
 
         <span
@@ -95,7 +101,11 @@ export const BookSettings = () => {
             setTypeColumnShow("sell");
           }}
         >
-          <SideIcon typeIcon="sell" active={typeColumnShow === "sell"} />
+          <SideIcon
+            typeIcon="sell"
+            active={typeColumnShow === "sell"}
+            size={columnIconSize}
+          />
         </span>
       </div>
 
@@ -125,6 +135,7 @@ export const BookSettings = () => {
       </form>
 
       <select
+        name="decimalPlacesSelect"
         title="Decimal places"
         className="decimalSelect"
         onChange={handleDecimalPlaces}
