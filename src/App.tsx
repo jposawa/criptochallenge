@@ -113,6 +113,7 @@ export default function App() {
         theme={theme === "darkTheme" ? "dark" : "light"}
         closeOnClick
         position="top-right"
+        pauseOnFocusLoss={false}
       />
 
       <section className="bookContainer">

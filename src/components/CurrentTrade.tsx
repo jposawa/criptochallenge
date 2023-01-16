@@ -3,6 +3,7 @@ import axios from "axios";
 import { CurrentTradeType } from "../models";
 import { useRecoilValue } from "recoil";
 import { currentSymbolState } from "../state";
+import { numFixed } from "../helpers";
 
 export const CurrentTrade = () => {
   const [tradeWS, setTradeWS] = React.useState<WebSocket>();
@@ -25,8 +26,8 @@ export const CurrentTrade = () => {
             return {
               price: parseFloat(parsedData.p),
               isSeller: parsedData.m,
-            }
-          })
+            };
+          });
         }
       };
     }
@@ -37,7 +38,7 @@ export const CurrentTrade = () => {
       priceWS.onmessage = ({ data }: { data: string }) => {
         if (data) {
           const parsedData = JSON.parse(data);
-          const openPrice = parseFloat(parsedData.o).toFixed(2);
+          const openPrice = numFixed(parsedData.o, 2);
 
           setUsdPrice(openPrice);
         }
@@ -82,7 +83,7 @@ export const CurrentTrade = () => {
         const { data } = response;
 
         if (data) {
-          setUsdPrice(parseFloat(data.price).toFixed(2));
+          setUsdPrice(numFixed(data.price, 2));
         }
       })
       .catch((error) => {
@@ -97,15 +98,23 @@ export const CurrentTrade = () => {
     const _tradeWS = new WebSocket(
       `wss://stream.binance.com:9443/ws/${currentSymbol.code}@trade`
     );
-    const _priceWS = new WebSocket(`wss://stream.binance.com:9443/ws/${currentSymbol.code}@miniTicker`)
+    const _priceWS = new WebSocket(
+      `wss://stream.binance.com:9443/ws/${currentSymbol.code}@miniTicker`
+    );
 
-    if (tradeWS?.url !== _tradeWS.url || tradeWS.readyState === tradeWS.CLOSED) {
+    if (
+      tradeWS?.url !== _tradeWS.url ||
+      tradeWS.readyState === tradeWS.CLOSED
+    ) {
       tradeWS?.close();
 
       setTradeWS(_tradeWS);
     }
 
-    if (priceWS?.url !== _priceWS.url || priceWS.readyState === priceWS.CLOSED) {
+    if (
+      priceWS?.url !== _priceWS.url ||
+      priceWS.readyState === priceWS.CLOSED
+    ) {
       priceWS?.close();
 
       setPriceWS(_priceWS);
@@ -124,14 +133,12 @@ export const CurrentTrade = () => {
     <section className="currentData">
       {currentTrade && (
         <div className={currentTrade.isSeller ? "txtSeller" : "txtBuyer"}>
-          <span>{currentTrade?.price.toFixed(2)}</span>
+          <span>{numFixed(currentTrade?.price, 2)}</span>
           <span>{currentTrade.isSeller ? <>&#8595;</> : <>&#8593;</>}</span>
         </div>
       )}
 
-      {usdPrice && (
-        <span>${usdPrice}</span>
-      )}
+      {usdPrice && <span>${usdPrice}</span>}
     </section>
   );
 };
