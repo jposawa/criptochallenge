@@ -4,14 +4,20 @@ import "react-toastify/dist/ReactToastify.css";
 import "./App.scss";
 import { BookSettings, BookSide, CurrentTrade } from "./components";
 import { currentSymbolState, themeState } from "./state";
-import { OperationsDataProps } from "./models";
+import { OperationsDataType } from "./models";
 import { ToastContainer, toast } from "react-toastify";
+import axios from "axios";
+import { BOOK_LIMIT, getValidData } from "./helpers";
 
 export default function App() {
   const currentSymbol = useRecoilValue(currentSymbolState);
   const [depthWS, setDepthWS] = React.useState<WebSocket>();
   const [operationsData, setOperationsData] =
-    React.useState<OperationsDataProps>();
+    React.useState<OperationsDataType>({
+      asks: [],
+      bids: [],
+      snapshotUpdateId: 0,
+    });
 
   const theme = useRecoilValue(themeState);
 
@@ -21,15 +27,67 @@ export default function App() {
         if (data) {
           const parsedData = JSON.parse(data);
 
-          setOperationsData(parsedData);
+          setOperationsData((currentData) => {
+            const validId: boolean =
+              !currentData.lastUpdateId ||
+              parsedData.U === currentData.lastUpdateId + 1;
+
+            if (!validId) {
+              return currentData;
+            }
+
+            const validData = {
+              asks: getValidData(parsedData.a),
+              bids: getValidData(parsedData.b),
+            };
+
+            return {
+              ...currentData,
+              asks: [...currentData.asks, ...validData.asks].slice(
+                BOOK_LIMIT * -1
+              ),
+              bids: [...currentData.bids, ...validData.bids].slice(
+                BOOK_LIMIT * -1
+              ),
+              lastUpdateId: parsedData.u,
+            };
+          });
         }
       };
     }
   };
 
+  const loadOperationSnapshot = () => {
+    const upperCode = currentSymbol.code.toUpperCase();
+
+    axios
+      .get("https://api.binance.com/api/v3/depth", {
+        params: {
+          symbol: upperCode,
+          limit: 1000,
+        },
+      })
+      .then((response) => {
+        const { data } = response;
+
+        setOperationsData({
+          asks: data.asks,
+          bids: data.bids,
+          code: upperCode,
+          snapshotUpdateId: data.lastUpdateId,
+        });
+      })
+      .catch((error) => {
+        console.error("Error fetching snapshot", error);
+      })
+      .finally(() => {
+        updateOperations();
+      });
+  };
+
   React.useEffect(() => {
     const _depthWS = new WebSocket(
-      `wss://stream.binance.com:9443/ws/${currentSymbol.code}@depth20@100ms`
+      `wss://stream.binance.com:9443/ws/${currentSymbol.code}@depth`
     );
 
     if (depthWS?.url !== _depthWS.url) {
@@ -44,7 +102,9 @@ export default function App() {
   }, [currentSymbol]);
 
   React.useEffect(() => {
-    updateOperations();
+    if (operationsData.code !== currentSymbol.code.toUpperCase()) {
+      loadOperationSnapshot();
+    }
   }, [depthWS]);
 
   return (

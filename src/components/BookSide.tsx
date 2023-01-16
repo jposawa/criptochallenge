@@ -1,5 +1,5 @@
 import React from "react";
-
+import { BOOK_SIDE_LIMIT } from "../helpers";
 import "./BookSide.scss";
 
 type BookSideProps = {
@@ -14,16 +14,14 @@ export const BookSide: React.FC<BookSideProps> = ({ sideType, data }) => {
       : sideType?.toUpperCase() === "SELL"
       ? "--sellColor"
       : "--textColor";
+  
+  //Show only the top amount of data, based on BOOK_SIDE_LIMIT and ordered by price from high to low
   const filterredData = React.useMemo(() => {
     const sortedData = data
       ? data.sort((opA, opB) => parseFloat(opB[0]) - parseFloat(opA[0]))
       : [];
 
-    if (sortedData.length === 20) {
-      sortedData.splice(-5);
-    }
-
-    return sortedData;
+    return sortedData.slice(0, BOOK_SIDE_LIMIT);
   }, [data]);
 
   return (
@@ -34,7 +32,7 @@ export const BookSide: React.FC<BookSideProps> = ({ sideType, data }) => {
       <ul>
         {filterredData &&
           filterredData.map((operation, index) => {
-            const opPrice = Number.parseFloat(operation[0]).toFixed(2);
+            const opPrice = parseFloat(operation[0]).toFixed(2);
             const opAmount = parseFloat(operation[1]).toFixed(5);
             const opTotal = (
               parseFloat(opPrice) * parseFloat(opAmount)

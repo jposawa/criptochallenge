@@ -46,7 +46,7 @@ export const BookSettings = () => {
               base: tradingSymbol.baseAsset,
               quote: tradingSymbol.quoteAsset,
             }));
-
+          
           setSymbolsList(parsedList);
         })
         .catch((error) => {
