@@ -34,7 +34,7 @@ export const CurrentTrade = () => {
             }
 
             return {
-              price: parseFloat(parsedData.p),
+              price: parsedData.p,
               isSeller: parsedData.m,
             };
           });
@@ -57,7 +57,7 @@ export const CurrentTrade = () => {
   };
 
   const getTradeSnapshot = () => {
-    const trade: CurrentTradeType = { price: 0, isSeller: false };
+    const trade: CurrentTradeType = { price: "0", isSeller: false };
 
     axios
       .get("https://data.binance.com/api/v3/trades", {
@@ -67,7 +67,7 @@ export const CurrentTrade = () => {
         },
       })
       .then((response) => {
-        trade.price = parseFloat(response.data?.[0]?.price);
+        trade.price = response.data?.[0]?.price;
         trade.isSeller = response.data?.[0]?.isBuyerMaker;
 
         setCurrentTrade(trade);

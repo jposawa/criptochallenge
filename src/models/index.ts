@@ -1,5 +1,5 @@
 export type CurrentTradeType = {
-  price: number;
+  price: string;
   isSeller: boolean;
   usdPrice?: number;
 };
