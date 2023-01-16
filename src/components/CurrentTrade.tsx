@@ -2,8 +2,8 @@ import React from "react";
 import axios from "axios";
 import { CurrentTradeType } from "../models";
 import { useRecoilValue } from "recoil";
-import { currentSymbolState } from "../state";
-import { numFixed } from "../helpers";
+import { currentSymbolState, decimalPlacesState } from "../state";
+import { numFixed, roundUp } from "../helpers";
 
 export const CurrentTrade = () => {
   const [tradeWS, setTradeWS] = React.useState<WebSocket>();
@@ -11,6 +11,17 @@ export const CurrentTrade = () => {
   const [currentTrade, setCurrentTrade] = React.useState<CurrentTradeType>();
   const [usdPrice, setUsdPrice] = React.useState<string>();
   const currentSymbol = useRecoilValue(currentSymbolState);
+  const decimalPlaces = useRecoilValue(decimalPlacesState);
+
+  const getUsdSymbol = () => {
+    const usdSymbol = [currentSymbol?.base, "BUSD"];
+
+    if (currentSymbol.base === "USDT") {
+      usdSymbol.reverse();
+    }
+
+    return usdSymbol;
+  };
 
   const updateTrade = () => {
     if (tradeWS) {
@@ -24,7 +35,7 @@ export const CurrentTrade = () => {
             }
 
             return {
-              price: parseFloat(parsedData.p),
+              price: parsedData.p,
               isSeller: parsedData.m,
             };
           });
@@ -47,7 +58,7 @@ export const CurrentTrade = () => {
   };
 
   const getTradeSnapshot = () => {
-    const trade: CurrentTradeType = { price: 0, isSeller: false };
+    const trade: CurrentTradeType = { price: "0", isSeller: false };
 
     axios
       .get("https://data.binance.com/api/v3/trades", {
@@ -57,7 +68,7 @@ export const CurrentTrade = () => {
         },
       })
       .then((response) => {
-        trade.price = parseFloat(response.data?.[0]?.price);
+        trade.price = response.data?.[0]?.price;
         trade.isSeller = response.data?.[0]?.isBuyerMaker;
 
         setCurrentTrade(trade);
@@ -71,12 +82,10 @@ export const CurrentTrade = () => {
   };
 
   const getPriceSnapshot = () => {
-    const trade: CurrentTradeType = { price: 0, isSeller: false };
-
     axios
       .get("https://data.binance.com/api/v3/ticker/price", {
         params: {
-          symbol: currentSymbol.code.toUpperCase(),
+          symbol: getUsdSymbol().join(""),
         },
       })
       .then((response) => {
@@ -95,11 +104,19 @@ export const CurrentTrade = () => {
   };
 
   React.useEffect(() => {
+    const usdSymbol = [currentSymbol?.base, "BUSD"];
+
+    if (currentSymbol.base === "USDT") {
+      usdSymbol.reverse();
+    }
+
     const _tradeWS = new WebSocket(
       `wss://stream.binance.com:9443/ws/${currentSymbol.code}@trade`
     );
     const _priceWS = new WebSocket(
-      `wss://stream.binance.com:9443/ws/${currentSymbol.code}@miniTicker`
+      `wss://stream.binance.com:9443/ws/${getUsdSymbol()
+        .join("")
+        .toLowerCase()}@miniTicker`
     );
 
     if (
@@ -133,7 +150,11 @@ export const CurrentTrade = () => {
     <section className="currentData">
       {currentTrade && (
         <div className={currentTrade.isSeller ? "txtSeller" : "txtBuyer"}>
-          <span>{numFixed(currentTrade?.price, 2)}</span>
+          <span>
+            {currentTrade.isSeller
+              ? roundUp(currentTrade?.price, decimalPlaces)
+              : numFixed(currentTrade?.price, decimalPlaces)}
+          </span>
           <span>{currentTrade.isSeller ? <>&#8595;</> : <>&#8593;</>}</span>
         </div>
       )}
