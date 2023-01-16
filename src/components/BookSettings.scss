@@ -3,6 +3,7 @@
   display: flex;
   justify-content: center;
   align-items: center;
+  padding: 0 1rem 1rem;
 
   form {
     width: 100%;
@@ -36,5 +37,12 @@
       height: var(--size);
       font-weight: bold;
     }
+  }
+
+  &>select {
+    border: 1px solid;
+    color: var(--mainColor);
+    background: var(--bgColor);
+    font-size: 1.2rem;
   }
 }
