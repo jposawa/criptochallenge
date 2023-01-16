@@ -2,7 +2,7 @@ import axios from "axios";
 import React from "react";
 import { useRecoilState } from "recoil";
 import { TradeSymbol } from "../models";
-import { currentSymbolState } from "../state";
+import { currentSymbolState, decimalPlacesState } from "../state";
 import { toast } from "react-toastify";
 
 import "./BookSettings.scss";
@@ -11,6 +11,13 @@ export const BookSettings = () => {
   const [currentSymbol, setCurrentSymbol] = useRecoilState(currentSymbolState);
   const [symbolsList, setSymbolsList] = React.useState<TradeSymbol[]>([]);
   const symbolCodeRef = React.useRef<HTMLInputElement>(null);
+  const [decimalPlaces, setDecimalPlaces] = useRecoilState(decimalPlacesState);
+
+  const handleDecimalPlaces = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    const select = event.target;
+
+    setDecimalPlaces(parseInt(select?.value));
+  };
 
   const updateCurrentSymbol = (event: React.FormEvent) => {
     event.preventDefault();
@@ -46,7 +53,7 @@ export const BookSettings = () => {
               base: tradingSymbol.baseAsset,
               quote: tradingSymbol.quoteAsset,
             }));
-          
+
           setSymbolsList(parsedList);
         })
         .catch((error) => {
@@ -77,8 +84,19 @@ export const BookSettings = () => {
           ref={symbolCodeRef}
         />
 
-        <button type="submit" className="quadButton">&#8635;</button>
+        <button type="submit" className="quadButton">
+          &#8635;
+        </button>
       </form>
+      <select
+        className="decimalSelect"
+        onChange={handleDecimalPlaces}
+        defaultValue={decimalPlaces}
+      >
+        <option value="2">0.01</option>
+        <option value="1">0.1</option>
+        <option value="0">1</option>
+      </select>
     </div>
   );
 };

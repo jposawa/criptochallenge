@@ -2,8 +2,8 @@ import React from "react";
 import axios from "axios";
 import { CurrentTradeType } from "../models";
 import { useRecoilValue } from "recoil";
-import { currentSymbolState } from "../state";
-import { numFixed } from "../helpers";
+import { currentSymbolState, decimalPlacesState } from "../state";
+import { numFixed, roundUp } from "../helpers";
 
 export const CurrentTrade = () => {
   const [tradeWS, setTradeWS] = React.useState<WebSocket>();
@@ -11,6 +11,7 @@ export const CurrentTrade = () => {
   const [currentTrade, setCurrentTrade] = React.useState<CurrentTradeType>();
   const [usdPrice, setUsdPrice] = React.useState<string>();
   const currentSymbol = useRecoilValue(currentSymbolState);
+  const decimalPlaces = useRecoilValue(decimalPlacesState);
 
   const getUsdSymbol = () => {
     const usdSymbol = [currentSymbol?.base, "BUSD"];
@@ -149,7 +150,11 @@ export const CurrentTrade = () => {
     <section className="currentData">
       {currentTrade && (
         <div className={currentTrade.isSeller ? "txtSeller" : "txtBuyer"}>
-          <span>{numFixed(currentTrade?.price, 2)}</span>
+          <span>
+            {currentTrade.isSeller
+              ? roundUp(currentTrade?.price, decimalPlaces)
+              : numFixed(currentTrade?.price, decimalPlaces)}
+          </span>
           <span>{currentTrade.isSeller ? <>&#8595;</> : <>&#8593;</>}</span>
         </div>
       )}

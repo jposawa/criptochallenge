@@ -1,5 +1,7 @@
 import React, { LegacyRef } from "react";
-import { BOOK_SIDE_LIMIT, numFixed } from "../helpers";
+import { useRecoilValue } from "recoil";
+import { BOOK_SIDE_LIMIT, numFixed, roundUp } from "../helpers";
+import { decimalPlacesState } from "../state";
 import "./BookSide.scss";
 
 type BookSideProps = {
@@ -15,6 +17,7 @@ export const BookSide: React.FC<BookSideProps> = ({ sideType, data }) => {
       : sideType?.toUpperCase() === "SELL"
       ? "--sellColor"
       : "--textColor";
+  const decimalPlaces = useRecoilValue(decimalPlacesState);
   // I know each list item has 19 of height, so I'm doing this to not render unnecessary list items in DOM for mobile
   const maxItem = Math.floor((containerRef?.current?.offsetHeight || 0) / 19);
 
@@ -36,7 +39,10 @@ export const BookSide: React.FC<BookSideProps> = ({ sideType, data }) => {
       <ul>
         {filterredData &&
           filterredData.slice(0, maxItem).map((operation, index) => {
-            const opPrice = numFixed(operation[0], 2);
+            const opPrice =
+              sideType?.toUpperCase() === "sell"
+                ? roundUp(operation[0], decimalPlaces)
+                : numFixed(operation[0], decimalPlaces);
             const opAmount = numFixed(operation[1], 5);
             const opTotal = numFixed(
               parseFloat(opPrice) * parseFloat(opAmount),
