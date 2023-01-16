@@ -12,6 +12,16 @@ export const CurrentTrade = () => {
   const [usdPrice, setUsdPrice] = React.useState<string>();
   const currentSymbol = useRecoilValue(currentSymbolState);
 
+  const getUsdSymbol = () => {
+    const usdSymbol = [currentSymbol?.base, "BUSD"];
+
+    if (currentSymbol.base === "USDT") {
+      usdSymbol.reverse();
+    }
+
+    return usdSymbol;
+  };
+
   const updateTrade = () => {
     if (tradeWS) {
       tradeWS.onmessage = ({ data }: { data: string }) => {
@@ -71,12 +81,10 @@ export const CurrentTrade = () => {
   };
 
   const getPriceSnapshot = () => {
-    const trade: CurrentTradeType = { price: 0, isSeller: false };
-
     axios
       .get("https://data.binance.com/api/v3/ticker/price", {
         params: {
-          symbol: currentSymbol.code.toUpperCase(),
+          symbol: getUsdSymbol().join(""),
         },
       })
       .then((response) => {
@@ -95,11 +103,19 @@ export const CurrentTrade = () => {
   };
 
   React.useEffect(() => {
+    const usdSymbol = [currentSymbol?.base, "BUSD"];
+
+    if (currentSymbol.base === "USDT") {
+      usdSymbol.reverse();
+    }
+
     const _tradeWS = new WebSocket(
       `wss://stream.binance.com:9443/ws/${currentSymbol.code}@trade`
     );
     const _priceWS = new WebSocket(
-      `wss://stream.binance.com:9443/ws/${currentSymbol.code}@miniTicker`
+      `wss://stream.binance.com:9443/ws/${getUsdSymbol()
+        .join("")
+        .toLowerCase()}@miniTicker`
     );
 
     if (
