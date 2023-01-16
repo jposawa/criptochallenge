@@ -2,16 +2,23 @@ import axios from "axios";
 import React from "react";
 import { useRecoilState } from "recoil";
 import { TradeSymbol } from "../models";
-import { currentSymbolState, decimalPlacesState } from "../state";
+import {
+  currentSymbolState,
+  decimalPlacesState,
+  typeColumnShowState,
+} from "../state";
 import { toast } from "react-toastify";
 
 import "./BookSettings.scss";
+import { SideIcon } from "./SideIcon";
 
 export const BookSettings = () => {
   const [currentSymbol, setCurrentSymbol] = useRecoilState(currentSymbolState);
   const [symbolsList, setSymbolsList] = React.useState<TradeSymbol[]>([]);
   const symbolCodeRef = React.useRef<HTMLInputElement>(null);
   const [decimalPlaces, setDecimalPlaces] = useRecoilState(decimalPlacesState);
+  const [typeColumnShow, setTypeColumnShow] =
+    useRecoilState(typeColumnShowState);
 
   const handleDecimalPlaces = (event: React.ChangeEvent<HTMLSelectElement>) => {
     const select = event.target;
@@ -64,6 +71,34 @@ export const BookSettings = () => {
 
   return (
     <div className="bookSettings">
+      <div className="columnTypes">
+        <span
+          onClick={() => {
+            setTypeColumnShow("both");
+          }}
+        >
+          <SideIcon
+            active={typeColumnShow !== "buy" && typeColumnShow !== "sell"}
+          />
+        </span>
+
+        <span
+          onClick={() => {
+            setTypeColumnShow("buy");
+          }}
+        >
+          <SideIcon typeIcon="buy" active={typeColumnShow === "buy"} />
+        </span>
+
+        <span
+          onClick={() => {
+            setTypeColumnShow("sell");
+          }}
+        >
+          <SideIcon typeIcon="sell" active={typeColumnShow === "sell"} />
+        </span>
+      </div>
+
       <form onSubmit={updateCurrentSymbol}>
         <datalist id="symbolsList">
           {symbolsList.map((symbol, index) => (
@@ -88,7 +123,9 @@ export const BookSettings = () => {
           &#8635;
         </button>
       </form>
+
       <select
+        title="Decimal places"
         className="decimalSelect"
         onChange={handleDecimalPlaces}
         defaultValue={decimalPlaces}

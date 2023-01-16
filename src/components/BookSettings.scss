@@ -45,4 +45,17 @@
     background: var(--bgColor);
     font-size: 1.2rem;
   }
+
+  .columnTypes {
+    display: flex;
+    gap: 15%;
+
+    &>span {
+      cursor: pointer;
+    }
+  }
+
+  @media screen and (min-width: 1200px) {
+    padding: 0.5rem 1rem;
+  }
 }

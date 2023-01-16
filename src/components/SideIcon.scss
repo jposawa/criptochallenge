@@ -1,0 +1,46 @@
+.sideIcon {
+  --iconSize: var(--size, 2rem);
+
+  position: relative;
+  width: var(--iconSize);
+  height: var(--iconSize);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  & > * {
+    width: 45%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10%;
+    overflow: hidden;
+  }
+
+  & > span {
+    & > span {
+      width: 100%;
+      height: 100%;
+
+      &:first-child {
+        background: var(--sellColor);
+      }
+
+      &:last-child {
+        background: var(--buyColor);
+      }
+    }
+  }
+
+  & > ul {
+    background: none;
+
+    & > li {
+      width: 100%;
+      height: 30%;
+      background: var(--textColor);
+    }
+  }
+}

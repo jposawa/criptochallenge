@@ -20,3 +20,8 @@ export const decimalPlacesState = atom<number>({
   key: `${NAMESPACE}decimalPlaces`,
   default: 2,
 });
+
+export const typeColumnShowState = atom<string>({
+  key: `${NAMESPACE}typeColumnShow`,
+  default: "both",
+});
