@@ -37,7 +37,7 @@ export const BookSettings = () => {
     if (symbolsList.length === 0) {
       axios
         .get("https://data.binance.com/api/v3/exchangeInfo")
-        .then((response) => {
+        .then(async (response) => {
           const { symbols } = response?.data;
           const parsedList = symbols
             .filter((symbol: any) => symbol?.status === "TRADING")
@@ -46,7 +46,7 @@ export const BookSettings = () => {
               base: tradingSymbol.baseAsset,
               quote: tradingSymbol.quoteAsset,
             }));
-
+          
           setSymbolsList(parsedList);
         })
         .catch((error) => {

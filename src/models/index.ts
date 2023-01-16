@@ -1,7 +1,7 @@
-export type CurrentTradeProps = {
-  price: number,
-  isSeller: boolean,
-  usdPrice?: number,
+export type CurrentTradeType = {
+  price: number;
+  isSeller: boolean;
+  usdPrice?: number;
 };
 
 export type TradeSymbol = {
@@ -10,8 +10,10 @@ export type TradeSymbol = {
   quote: string;
 }
 
-export type OperationsDataProps = {
-  asks: string[],
-  bids: string[],
-  lastUpdateId: number,
+export type OperationsDataType = {
+  asks: string[];
+  bids: string[];
+  code?: string;
+  snapshotUpdateId: number;
+  lastUpdateId?: number;
 };
