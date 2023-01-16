@@ -12,6 +12,10 @@ button {
   border: 1px solid;
 }
 
+button, select {
+  cursor: pointer;
+}
+
 main {
   --buyColor: rgba(13, 203, 129, 1);
   --sellColor: rgba(246, 71, 93, 1);
@@ -121,6 +125,10 @@ main {
         opacity: 0.9;
       }
     }
+  }
+
+  @media screen and (min-width: 1200px) {
+    flex-direction: column-reverse;
   }
 }
 

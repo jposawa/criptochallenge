@@ -3,7 +3,7 @@ import { useRecoilValue } from "recoil";
 import "react-toastify/dist/ReactToastify.css";
 import "./App.scss";
 import { BookSettings, BookSide, CurrentTrade } from "./components";
-import { currentSymbolState, themeState } from "./state";
+import { currentSymbolState, themeState, typeColumnShowState } from "./state";
 import { OperationsDataType } from "./models";
 import { ToastContainer, toast } from "react-toastify";
 import axios from "axios";
@@ -19,6 +19,7 @@ export default function App() {
       snapshotUpdateId: 0,
     });
 
+  const typeColumnShow = useRecoilValue(typeColumnShowState);
   const theme = useRecoilValue(themeState);
 
   const updateOperations = () => {
@@ -90,7 +91,10 @@ export default function App() {
       `wss://stream.binance.com:9443/ws/${currentSymbol.code}@depth`
     );
 
-    if (depthWS?.url !== _depthWS.url || depthWS.readyState === depthWS.CLOSED) {
+    if (
+      depthWS?.url !== _depthWS.url ||
+      depthWS.readyState === depthWS.CLOSED
+    ) {
       if (depthWS) {
         toast.success(
           `Getting data for ${currentSymbol.base}/${currentSymbol.quote}`
@@ -123,11 +127,15 @@ export default function App() {
             <span>Amount ({currentSymbol.base})</span>
             <span>Total</span>
           </header>
-          <BookSide sideType="sell" data={operationsData?.asks || []} />
+          {typeColumnShow !== "buy" && (
+            <BookSide sideType="sell" data={operationsData?.asks || []} />
+          )}
 
           <CurrentTrade />
 
-          <BookSide sideType="buy" data={operationsData?.bids || []} />
+          {typeColumnShow !== "sell" && (
+            <BookSide sideType="buy" data={operationsData?.bids || []} />
+          )}
         </div>
 
         <BookSettings />
