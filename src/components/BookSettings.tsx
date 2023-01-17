@@ -19,7 +19,7 @@ export const BookSettings = () => {
   const [decimalPlaces, setDecimalPlaces] = useRecoilState(decimalPlacesState);
   const [typeColumnShow, setTypeColumnShow] =
     useRecoilState(typeColumnShowState);
-  const columnIconSize = window.innerWidth >= 1200 ? "2rem" : "1.5rem";
+  const columnIconSize = "1.5rem";
 
   const handleDecimalPlaces = (event: React.ChangeEvent<HTMLSelectElement>) => {
     const select = event.target;

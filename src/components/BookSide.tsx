@@ -7,9 +7,16 @@ import "./BookSide.scss";
 type BookSideProps = {
   data: string[];
   sideType?: string;
+  className?: string;
+  style?: React.CSSProperties;
 };
 
-export const BookSide: React.FC<BookSideProps> = ({ sideType, data }) => {
+export const BookSide: React.FC<BookSideProps> = ({
+  sideType,
+  data,
+  className,
+  style,
+}) => {
   const containerRef = React.useRef<HTMLElement>(null);
   const priceColor =
     sideType?.toUpperCase() === "BUY"
@@ -32,15 +39,20 @@ export const BookSide: React.FC<BookSideProps> = ({ sideType, data }) => {
 
   return (
     <section
-      className="bookSide"
-      style={{ "--priceColor": `var(${priceColor})` } as React.CSSProperties}
+      className={`bookSide ${className ? className : ""}`}
+      style={
+        {
+          ...style,
+          "--priceColor": `var(${priceColor})`,
+        } as React.CSSProperties
+      }
       ref={containerRef}
     >
       <ul>
         {filterredData &&
           filterredData.slice(0, maxItem).map((operation, index) => {
             const opPrice =
-              sideType?.toUpperCase() === "sell"
+              sideType?.toLowerCase() === "sell"
                 ? roundUp(operation[0], decimalPlaces)
                 : numFixed(operation[0], decimalPlaces);
             const opAmount = numFixed(operation[1], 5);
