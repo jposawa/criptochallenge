@@ -10,9 +10,9 @@ export const themeState = atom<string>({
 export const currentSymbolState = atom<TradeSymbol>({
   key: `${NAMESPACE}tradeSymbol`,
   default: {
-    code: "btcbusd",
-    base: "BTC",
-    quote: "BUSD",
+    code: "usdtbrl",
+    base: "USDT",
+    quote: "BRL",
   }
 });
 

@@ -51,7 +51,7 @@ export const BookSettings = () => {
   React.useEffect(() => {
     if (symbolsList.length === 0) {
       axios
-        .get("https://data.binance.com/api/v3/exchangeInfo")
+        .get("https://api.binance.com/api/v3/exchangeInfo")
         .then(async (response) => {
           const { symbols } = response?.data;
           const parsedList = symbols
