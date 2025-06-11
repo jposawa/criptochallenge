@@ -61,7 +61,7 @@ export const CurrentTrade = () => {
     const trade: CurrentTradeType = { price: "0", isSeller: false };
 
     axios
-      .get("https://data.binance.com/api/v3/trades", {
+      .get("https://api.binance.com/api/v3/trades", {
         params: {
           symbol: currentSymbol.code.toUpperCase(),
           limit: 1,
@@ -83,7 +83,7 @@ export const CurrentTrade = () => {
 
   const getPriceSnapshot = () => {
     axios
-      .get("https://data.binance.com/api/v3/ticker/price", {
+      .get("https://api.binance.com/api/v3/ticker/price", {
         params: {
           symbol: getUsdSymbol().join(""),
         },
