@@ -23,5 +23,15 @@ export const decimalPlacesState = atom<number>({
 
 export const typeColumnShowState = atom<string>({
   key: `${NAMESPACE}typeColumnShow`,
-  default: "both",
+  default: "none",
+});
+
+export const showHeaderAtom = atom<boolean>({
+  key: `${NAMESPACE}showHeader`,
+  default: false,
+});
+
+export const showCurrentTradeAtom = atom<boolean>({
+  key: `${NAMESPACE}showCurrentTrade`,
+  default: false,
 });
