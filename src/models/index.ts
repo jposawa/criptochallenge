@@ -17,3 +17,8 @@ export type OperationsDataType = {
   snapshotUpdateId: number;
   lastUpdateId?: number;
 };
+
+export enum DataSource {
+  Socket = "socket",
+  Frame = "frame",
+}

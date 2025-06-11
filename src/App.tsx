@@ -5,12 +5,14 @@ import "./App.scss";
 import { BookSettings, BookSide, CurrentTrade } from "./components";
 import {
 	currentSymbolState,
+	operationDataSourceAtom,
 	showCurrentTradeAtom,
 	showHeaderAtom,
+	showSettingsAtom,
 	themeState,
 	typeColumnShowState,
 } from "./state";
-import { OperationsDataType } from "./models";
+import { DataSource, OperationsDataType } from "./models";
 import { ToastContainer, toast } from "react-toastify";
 import axios from "axios";
 import { BOOK_LIMIT, getValidData } from "./helpers";
@@ -18,6 +20,9 @@ import { BOOK_LIMIT, getValidData } from "./helpers";
 export default function App() {
 	const [showCurrentTrade, setShowCurrentTrade] =
 		useRecoilState(showCurrentTradeAtom);
+	const [operationDataSource, setOperationDataSource] =
+		React.useState<DataSource>(DataSource.Frame);
+	const [showSettings, setShowSettings] = useRecoilState(showSettingsAtom);
 	const [showHeader, setShowHeader] = useRecoilState(showHeaderAtom);
 	const currentSymbol = useRecoilValue(currentSymbolState);
 	const [depthWS, setDepthWS] = React.useState<WebSocket>();
@@ -27,6 +32,7 @@ export default function App() {
 			bids: [],
 			snapshotUpdateId: 0,
 		});
+	const [initialized, setInitialized] = React.useState(false);
 
 	const [typeColumnShow, setTypeColumnShow] =
 		useRecoilState(typeColumnShowState);
@@ -69,51 +75,66 @@ export default function App() {
 	};
 
 	const loadOperationSnapshot = () => {
-		const upperCode = currentSymbol.code.toUpperCase();
+		if (operationDataSource === DataSource.Socket) {
+			const upperCode = currentSymbol.code.toUpperCase();
 
-		axios
-			.get("https://api.binance.com/api/v3/depth", {
-				params: {
-					symbol: upperCode,
-					limit: 1000,
-				},
-			})
-			.then((response) => {
-				const { data } = response;
+			axios
+				.get("https://api.binance.com/api/v3/depth", {
+					params: {
+						symbol: upperCode,
+						limit: 1000,
+					},
+				})
+				.then((response) => {
+					const { data } = response;
 
-				setOperationsData({
-					asks: data.asks,
-					bids: data.bids,
-					code: upperCode,
-					snapshotUpdateId: data.lastUpdateId,
+					setOperationsData({
+						asks: data.asks,
+						bids: data.bids,
+						code: upperCode,
+						snapshotUpdateId: data.lastUpdateId,
+					});
+				})
+				.catch((error) => {
+					console.error("Error fetching snapshot", error);
+				})
+				.finally(() => {
+					updateOperations();
 				});
-			})
-			.catch((error) => {
-				console.error("Error fetching snapshot", error);
-			})
-			.finally(() => {
-				updateOperations();
-			});
+		}
 	};
 
 	React.useEffect(() => {
-		const _depthWS = new WebSocket(
-			`wss://stream.binance.com:9443/ws/${currentSymbol.code}@depth`
-		);
-
-		if (
-			depthWS?.url !== _depthWS.url ||
-			depthWS.readyState === depthWS.CLOSED
-		) {
-			if (depthWS) {
-				toast.success(
-					`Getting data for ${currentSymbol.base}/${currentSymbol.quote}`
+		try {
+			// console.table({
+			// 	_boardEvent: "Test socket",
+			// 	operationDataSource,
+			// 	shouldOpen: operationDataSource === DataSource.Socket,
+			// });
+			if (operationDataSource === DataSource.Socket) {
+				const _depthWS = new WebSocket(
+					`wss://stream.binance.com:9443/ws/${currentSymbol.code}@depth`
 				);
+
+				console.log("[Board] ws", { _depthWS, depthWS });
+
+				if (
+					depthWS?.url !== _depthWS.url ||
+					depthWS.readyState === depthWS.CLOSED
+				) {
+					if (depthWS) {
+						toast.success(
+							`Getting data for ${currentSymbol.base}/${currentSymbol.quote}`
+						);
+					}
+					depthWS?.close();
+					setDepthWS(_depthWS);
+				}
 			}
-			depthWS?.close();
-			setDepthWS(_depthWS);
+		} catch (error) {
+			console.error("[Board WS] Error opening WebSocket", error);
 		}
-	}, [currentSymbol]);
+	}, [currentSymbol, operationDataSource]);
 
 	React.useEffect(() => {
 		if (operationsData.code !== currentSymbol.code.toUpperCase()) {
@@ -125,18 +146,46 @@ export default function App() {
 		const origin = event?.origin;
 		const validOrigin = "localhost";
 
+		console.log("[Board] Message", {
+			initialized,
+			event,
+			operationDataSource,
+		});
+
 		if (origin?.toLowerCase().includes(validOrigin.toLowerCase())) {
 			const { data } = event;
 
+			// if (operationDataSource === DataSource.Socket) {
+
+			// }
 			console.table({
 				_event: "[Board] Message received",
+				event,
 				data: event?.data,
+				initialized,
+				operationDataSource,
 			});
 
-			if (data?.type === "config") {
-        setShowCurrentTrade(data?.showCurrentTrade);
-        setShowHeader(data?.showHeader);
-        setTypeColumnShow(data?.typeColumnShow ?? "none");
+			if (!initialized) {
+				if (data?.type === "config") {
+					setShowCurrentTrade(!!data?.showCurrentTrade);
+					setShowHeader(!!data?.showHeader);
+					setTypeColumnShow(data?.typeColumnShow ?? "none");
+					setShowSettings(!!data?.showSettings);
+					setOperationDataSource(data?.operationDataSource ?? DataSource.Frame);
+					setInitialized(true);
+				}
+			} else if (
+				data?.type === "opData" &&
+				operationDataSource === DataSource.Frame
+			) {
+				console.log("[Board Frame Data] Should update from other frame", {
+					event,
+					data,
+					operationDataSource,
+					operationsData,
+				});
+				// setOperationsData(() => data?.operationsData ?? {});
 			}
 		}
 	};
@@ -149,8 +198,20 @@ export default function App() {
 		};
 	}, []);
 
+	React.useEffect(() => {
+		if (operationDataSource === DataSource.Socket) {
+			window.parent.postMessage(
+				{
+					type: "opData",
+					operationsData,
+				},
+				"*"
+			);
+		}
+	}, [operationsData, operationDataSource]);
+
 	return (
-		<main className={theme}>
+		<main className={theme} data-source={operationDataSource}>
 			<ToastContainer
 				theme={theme === "darkTheme" ? "dark" : "light"}
 				closeOnClick
@@ -178,7 +239,7 @@ export default function App() {
 					)}
 				</div>
 
-				<BookSettings />
+				{showSettings && <BookSettings />}
 			</section>
 		</main>
 	);
