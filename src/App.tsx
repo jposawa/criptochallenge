@@ -116,8 +116,6 @@ export default function App() {
 					`wss://stream.binance.com:9443/ws/${currentSymbol.code}@depth`
 				);
 
-				console.log("[Board] ws", { _depthWS, depthWS });
-
 				if (
 					depthWS?.url !== _depthWS.url ||
 					depthWS.readyState === depthWS.CLOSED
@@ -142,53 +140,35 @@ export default function App() {
 		}
 	}, [depthWS]);
 
-	const handleMessage = (event: MessageEvent) => {
-		const origin = event?.origin;
-		const validOrigin = "localhost";
+	const handleMessage = React.useCallback(
+		(event: MessageEvent) => {
+			const origin = event?.origin;
+			const validOrigin = "localhost";
 
-		console.log("[Board] Message", {
-			initialized,
-			event,
-			operationDataSource,
-		});
+			if (origin?.toLowerCase().includes(validOrigin.toLowerCase())) {
+				const { data } = event;
 
-		if (origin?.toLowerCase().includes(validOrigin.toLowerCase())) {
-			const { data } = event;
-
-			// if (operationDataSource === DataSource.Socket) {
-
-			// }
-			console.table({
-				_event: "[Board] Message received",
-				event,
-				data: event?.data,
-				initialized,
-				operationDataSource,
-			});
-
-			if (!initialized) {
-				if (data?.type === "config") {
-					setShowCurrentTrade(!!data?.showCurrentTrade);
-					setShowHeader(!!data?.showHeader);
-					setTypeColumnShow(data?.typeColumnShow ?? "none");
-					setShowSettings(!!data?.showSettings);
-					setOperationDataSource(data?.operationDataSource ?? DataSource.Frame);
-					setInitialized(true);
+				if (!initialized) {
+					if (data?.type === "config") {
+						setShowCurrentTrade(!!data?.showCurrentTrade);
+						setShowHeader(!!data?.showHeader);
+						setTypeColumnShow(data?.typeColumnShow ?? "none");
+						setShowSettings(!!data?.showSettings);
+						setOperationDataSource(
+							data?.operationDataSource ?? DataSource.Frame
+						);
+						setInitialized(true);
+					}
+				} else if (
+					data?.type === "opData" &&
+					operationDataSource === DataSource.Frame
+				) {
+					setOperationsData(() => data?.operationsData ?? {});
 				}
-			} else if (
-				data?.type === "opData" &&
-				operationDataSource === DataSource.Frame
-			) {
-				console.log("[Board Frame Data] Should update from other frame", {
-					event,
-					data,
-					operationDataSource,
-					operationsData,
-				});
-				// setOperationsData(() => data?.operationsData ?? {});
 			}
-		}
-	};
+		},
+		[initialized, operationsData, operationDataSource, setOperationsData]
+	);
 
 	React.useEffect(() => {
 		window.addEventListener("message", handleMessage);
@@ -196,7 +176,7 @@ export default function App() {
 		return () => {
 			window.removeEventListener("message", handleMessage);
 		};
-	}, []);
+	}, [handleMessage]);
 
 	React.useEffect(() => {
 		if (operationDataSource === DataSource.Socket) {
