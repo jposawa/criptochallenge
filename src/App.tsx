@@ -143,9 +143,13 @@ export default function App() {
 	const handleMessage = React.useCallback(
 		(event: MessageEvent) => {
 			const origin = event?.origin;
-			const validOrigin = "localhost";
+			const validOriginList = ["localhost", "netlify"];
 
-			if (origin?.toLowerCase().includes(validOrigin.toLowerCase())) {
+			if (
+				validOriginList.some((validOrigin) =>
+					origin?.toLowerCase().includes(validOrigin.toLowerCase())
+				)
+			) {
 				const { data } = event;
 
 				if (!initialized) {
